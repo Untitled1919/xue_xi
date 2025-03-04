@@ -1,0 +1,219 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include<stdlib.h>
+#include<math.h>
+#include<windows.h>
+#define MAX 1000
+
+char miss[20];
+int sj(int min, int max)
+{
+	return rand() % (max - min + 1) + min;
+}
+
+void shuffle(int x[], int n)
+{
+	for (int i = n - 1; i > 0; i--)
+	{
+		int j = sj(0, i - 1);
+		int over = x[i];
+		x[i] = x[j];
+		x[j] = over;
+	}
+}
+
+void chinese(char c[], char e[],int count)
+{
+	int i = 0;
+	int number[MAX];
+	for (i = 0; i < count; i++)
+	{
+		number[i] = i;
+	}
+	shuffle(number, count);
+	int f = 0;
+	double ct = 0.0;
+	char answer[20];
+	for (i = 0; i < count; i++)
+	{
+		printf("英文：%s\n", e + number[i] * 20);//输出随机英文
+		printf("请输入对应中文：");
+		while ((f = getchar()) != '\n');//清空输入缓冲区
+
+		scanf("%[^\n]", answer);//输入
+
+		if (strcmp(answer, c + number[i] * 20) == 0)//检测是否正确
+		{
+			printf("正确的\n");
+			ct++;
+		}
+		else
+		{
+			printf("错误的，答案为%s\n", c + number[i] * 20);
+			FILE* file = fopen("D:\\Untitled\\c语言学习\\默写计划\\x64\\Debug\\miss.txt", "a");
+			if (!file)
+			{
+				printf("错误：文件打开失败！\n");
+				return 1;
+			}
+
+			fprintf(file,"译中错：%s\n", e + number[i] * 20);
+			fclose(file);
+		}
+	}
+	printf("中文模式学习完毕\n准确率为百分之%.2f\n       按1返回", (ct / count) * 100);
+	scanf("%d", &i);
+	switch (i)
+	{
+	case 1:
+		return;
+	default:
+		printf("只能选1或2");
+	}
+
+}
+
+
+
+void english(char c[], char e[],int count)
+{
+	int i = 0;
+	int number[MAX];
+	for (i = 0; i < count; i++)
+	{
+		number[i] = i;
+	}
+
+	char answer[20];
+	shuffle(number, count);
+	
+	int f = 0;
+	double ct = 0.0;
+	for (i = 0; i < count; i++)
+	{
+		printf("中文：%s\n", c + number[i] * 20);
+		printf("请输入对应英文：");
+		while ((f = getchar()) != '\n');
+
+		scanf("%[^\n]", answer);
+
+		if (strcmp(answer, e + number[i] * 20) == 0)
+		{
+			printf("正确的\n");
+			ct++;
+		}
+		else
+		{
+			printf("错误的，答案为%s\n", e + number[i] * 20);
+			FILE* file = fopen("D:\\Untitled\\c语言学习\\默写计划\\x64\\Debug\\miss.txt", "a");
+			if (!file)
+			{
+				printf("错误：文件打开失败！\n");
+				return 1;
+			}
+
+			fprintf(file, "译英错：%s\n", c + number[i] * 20);
+			fclose(file);
+
+		
+		}
+	}
+	printf("英文模式学习完毕\n准确率为百分之%.2f\n        按1返回", (ct / count) * 100);
+	scanf("%d", &i);
+	switch (i)
+	{
+	case 1:
+		return;
+	default:
+		printf("只能选1或2");
+	}
+
+
+}
+int main()
+{
+	srand(time(NULL));
+	int count = 0;
+	char en[MAX][20];
+	char ch[MAX][20];
+
+
+	FILE* file = fopen("D:\\Untitled\\c语言学习\\默写计划\\x64\\Debug\\word.txt", "r"); //读取指定区域的txt文件，只支持ANSI编码
+	if (!file) 
+	{
+		printf("错误：文件打开失败！\n");
+		return 1;
+	}
+
+
+	char line[2 * MAX];
+	while (fgets(line, sizeof(line), file) && count < MAX)
+	{
+		line[strcspn(line, "\n")] = 0;
+		char* e = strtok(line, ",");
+		char* c = strtok(NULL, ",");
+		if (e && c)
+		{
+
+			strncpy(en[count], e, 20);
+			strncpy(ch[count], c, 20);
+			count++;
+		}
+	}
+	fclose(file);
+	int play = 1;
+	do
+	{
+		system("cls");
+		printf("**************************\n");
+		printf("******** 单词听写 ********\n");
+		printf("1:写英文  2:写中文  3:偷懒\n");
+		printf("**************************\n");
+		printf("**************************");
+		printf("\n   请选择(1或2或3)：");
+		scanf("%d", &play);
+		switch (play)
+		{
+		case 1:
+			english(ch,en,count);
+		
+			break;
+		case 2:
+			chinese(ch,en,count);
+			break;
+		case 3:
+			play = 0;
+			time_t rawtime;            // 时间戳（整数类型）
+			struct tm* timeinfo;        // 时间结构体指针
+			char buffer[80];            // 存储格式化后的字符串
+
+			// 1. 获取当前时间戳
+			time(&rawtime);
+
+			// 2. 将时间戳转换为本地时间结构体
+			timeinfo = localtime(&rawtime);
+
+			// 3. 格式化时间为字符串
+			strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M", timeinfo);
+
+			FILE* file = fopen("D:\\Untitled\\c语言学习\\默写计划\\x64\\Debug\\miss.txt", "a");
+			if (!file)
+			{
+				printf("错误：文件打开失败！\n");
+				return 1;
+			}
+
+			fprintf(file, "以上错误时间是:\n%s\n", buffer);
+			fclose(file);
+
+			break;
+		default:
+			printf("只能选1或2或3");
+		}
+		
+	} while (play);
+		
+	return 0;
+}
